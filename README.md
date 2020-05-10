@@ -1,5 +1,7 @@
 # Curve Matcher
 
+[![Build Status](https://www.travis-ci.org/farepay/curve-matcher.svg?branch=master)](https://www.travis-ci.org/farepay/curve-matcher)
+
 A Kotlin library for doing curve matching with Fréchet distance and Procrustes analysis. It has been ported from Javascript library [Curve Matcher](https://github.com/chanind/curve-matcher).
 
 ## Installation
