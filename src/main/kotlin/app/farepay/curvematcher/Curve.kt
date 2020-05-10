@@ -82,7 +82,7 @@ data class Curve(val points: List<Point>) {
         val thatLen = that.length()
 
         val longCurve = if (thisLen >= thatLen) { this } else { that }
-        val shortCurve = if (thisLen <= thatLen) { this } else { that }
+        val shortCurve = if (thisLen >= thatLen) { that } else { this }
 
         fun calcVal(i: Int, j: Int, prevResultsCol: LinkedList<Double>, curResultsCol: LinkedList<Double>): Double {
             if (i == 0 && j == 0) {
@@ -126,13 +126,51 @@ data class Curve(val points: List<Point>) {
         return Curve(translatedPoints.map{ (x, y) -> Point(x = x / scale, y = y / scale) })
     }
 
-    fun rotationAngle(relativeCurve: Curve): Double {
-        if (points.size != relativeCurve.points.size) {
-            throw IllegalArgumentException("curve and relativeCurve must have the same length")
+    fun rotationAngle(that: Curve): Double {
+        if (points.size != that.points.size) {
+            throw IllegalArgumentException("curves must have the same length")
         }
 
-        val numerator = points.mapIndexed { i, (x, y) -> y * relativeCurve.points[i].x - x * relativeCurve.points[i].y}.sum()
-        val denominator = points.mapIndexed { i, (x, y) -> x * relativeCurve.points[i].x + y * relativeCurve.points[i].y}.sum()
+        val numerator = points.mapIndexed { i, (x, y) -> y * that.points[i].x - x * that.points[i].y}.sum()
+        val denominator = points.mapIndexed { i, (x, y) -> x * that.points[i].x + y * that.points[i].y}.sum()
         return atan2(numerator, denominator)
+    }
+
+    fun similarityTo(that: Curve, estimationPoints: Int = 50, checkRotations: Boolean = true, rotations: Int = 10, restrictRotationAngle: Double = Math.PI): Double {
+        if (abs(restrictRotationAngle) > Math.PI) {
+            throw IllegalArgumentException("restrictRotationAngle cannot be larger than PI")
+        }
+
+        val normalizedThisCurve = this.normalize(estimationPoints = estimationPoints)
+        val normalizedOtherCurve = that.normalize(estimationPoints = estimationPoints)
+        val geoAvgCurveLen = sqrt(normalizedThisCurve.length() * normalizedOtherCurve.length())
+
+        val thetasToCheck = LinkedList(listOf(0.0))
+        if (checkRotations) {
+            var procrustesTheta = normalizedThisCurve.rotationAngle(normalizedOtherCurve)
+            // use a negative rotation rather than a large positive rotation
+            if (procrustesTheta > Math.PI) {
+                procrustesTheta -= 2 * Math.PI;
+            }
+
+            if (procrustesTheta != 0.0 && abs(procrustesTheta) < restrictRotationAngle) {
+                thetasToCheck.addLast(procrustesTheta)
+            }
+            for (i in 0 until rotations) {
+                val theta = -1 * restrictRotationAngle + (2 * i * restrictRotationAngle) / (rotations - 1)
+                // 0 and Math.PI are already being checked, no need to check twice
+                if (theta != 0.0 && theta != Math.PI) {
+                    thetasToCheck.addLast(theta);
+                }
+            }
+        }
+
+        // check some other thetas here just in case the procrustes theta isn't the best rotation
+        val minDist = thetasToCheck.map { theta ->
+            normalizedThisCurve.rotate(theta).distance(normalizedOtherCurve)
+        }.min() ?: Double.POSITIVE_INFINITY
+
+        // divide by Math.sqrt(2) to try to get the low results closer to 0
+        return max(1 - minDist / (geoAvgCurveLen / sqrt(2.0)), 0.0)
     }
 }
