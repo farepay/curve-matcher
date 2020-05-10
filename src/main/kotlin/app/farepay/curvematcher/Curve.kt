@@ -6,6 +6,8 @@ import kotlin.math.*
 
 data class Curve(val points: List<Point>) {
 
+    constructor(vararg points: Point) : this(listOf(*points))
+
     fun length(): Double {
         var prevPoint = points[0]
         var dist = 0.0

@@ -15,25 +15,25 @@ class CurveLengthTests : StringSpec({
         p1.distance(p2) shouldBe 15.0
         p2.distance(p3) shouldBe 15.0
 
-        Curve(listOf(p1, p2, p3)).length() shouldBe p1.distance(p2) + p2.distance(p3)
+        Curve(p1, p2, p3).length() shouldBe p1.distance(p2) + p2.distance(p3)
     }
 })
 
 class CurveSubdivideTests : StringSpec({
     "leave the curve the same if segment lengths are less than maxLen apart" {
-        val curve = Curve(listOf(
+        val curve = Curve(
             Point(0.0, 0.0), Point(4.0, 4.0)
-        ))
-        curve.subdivide(10.0) shouldBe Curve(listOf(
+        )
+        curve.subdivide(10.0) shouldBe Curve(
             Point(0.0, 0.0), Point(4.0, 4.0)
-        ))
+        )
     }
 
     "breaks up segments so that each segment is less than maxLen length" {
-        val curve = Curve(listOf(
+        val curve = Curve(
             Point(0.0, 0.0), Point(4.0, 4.0), Point(0.0, 8.0)
-        ))
-        curve.subdivide(sqrt(2.0)) shouldBe Curve(listOf(
+        )
+        curve.subdivide(sqrt(2.0)) shouldBe Curve(
             Point(0.0, 0.0),
             Point(1.0, 1.0),
             Point(2.0, 2.0),
@@ -43,72 +43,72 @@ class CurveSubdivideTests : StringSpec({
             Point(2.0, 6.0),
             Point(1.0, 7.0),
             Point(0.0, 8.0)
-        ))
+        )
     }
 
     "uses maxLen of 0.05 by default" {
-        val curve = Curve(listOf(
+        val curve = Curve(
             Point(0.0, 0.0), Point(0.0, 0.1)
-        ))
-        curve.subdivide() shouldBe Curve(listOf(
+        )
+        curve.subdivide() shouldBe Curve(
             Point(0.0, 0.0),
             Point(0.0, 0.05),
             Point(0.0, 0.1)
-        ))
+        )
     }
 })
 
 class CurveRebalanceTests : StringSpec({
     "divides a curve into equally spaced segments" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(0.0, 0.0),
             Point(4.0, 6.0)
-        ))
-        curve1.rebalance(3) shouldBe Curve(listOf(
+        )
+        curve1.rebalance(3) shouldBe Curve(
             Point(0.0, 0.0),
             Point(2.0, 3.0),
             Point(4.0, 6.0)
-        ))
+        )
 
-        val curve2 = Curve(listOf(
+        val curve2 = Curve(
             Point(0.0, 0.0),
             Point(9.0, 12.0),
             Point(0.0, 24.0)
-        ))
-        curve2.rebalance(4) shouldBe Curve(listOf(
+        )
+        curve2.rebalance(4) shouldBe Curve(
             Point(0.0, 0.0),
             Point(6.0, 8.0),
             Point(6.0, 16.0),
             Point(0.0, 24.0)
-        ))
+        )
     }
 })
 
 class CurveDistanceTests : StringSpec({
     "is 0 if the curves are the same" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(0.0, 0.0),
             Point(4.0, 4.0)
-        ))
-        val curve2 = Curve(listOf(
+        )
+        val curve2 = Curve(
             Point(0.0, 0.0),
             Point(4.0, 4.0)
-        ))
+        )
 
         curve1.distance(curve2) shouldBe 0
         curve2.distance(curve1) shouldBe 0
     }
 
     "less than then max length of any segment if curves are identical" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(0.0, 0.0),
             Point(2.0, 2.0),
             Point(4.0, 4.0)
-        ))
-        val curve2 = Curve(listOf(
+        )
+        val curve2 = Curve(
             Point(0.0, 0.0),
             Point(4.0, 4.0)
-        ))
+        )
 
         curve1.subdivide().distance(curve2.subdivide()) shouldBeLessThan 0.5
         curve1.subdivide(0.1).distance(curve2.subdivide(0.1)) shouldBeLessThan 0.1
@@ -116,37 +116,37 @@ class CurveDistanceTests : StringSpec({
     }
 
     "will be the dist of the starting points if those are the only difference" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(1.0, 0.0),
             Point(4.0, 4.0)
-        ))
-        val curve2 = Curve(listOf(
+        )
+        val curve2 = Curve(
             Point(0.0, 0.0),
             Point(4.0, 4.0)
-        ))
+        )
 
         curve1.distance(curve2) shouldBe 1
         curve2.distance(curve1) shouldBe 1
     }
 
     "gives correct results 1" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(1.0, 0.0),
             Point(2.4, 43.0),
             Point(-1.0, 4.3),
             Point(4.0, 4.0)
-        ))
-        val curve2 = Curve(listOf(
+        )
+        val curve2 = Curve(
             Point(0.0, 0.0),
             Point(14.0, 2.4),
             Point(4.0, 4.0)
-        ))
+        )
 
         curve1.distance(curve2) shouldBe (39.0328 plusOrMinus 0.001)
     }
 
     "gives correct results 2" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(63.44852183813086, 24.420192387119634),
             Point(19.472881275654252, 77.306125067647),
             Point(22.0150089075698, 5.115699052924483),
@@ -177,31 +177,31 @@ class CurveDistanceTests : StringSpec({
             Point(8.764170623754097, 37.003392529458104),
             Point(52.97112238152346, 9.76631343977752),
             Point(88.85357966283867, 60.767524033054144)
-        ))
-        val curve2 = Curve(listOf(
+        )
+        val curve2 = Curve(
             Point(0.0, 0.0),
             Point(14.0, 2.4),
             Point(4.0, 4.0)
-        ))
+        )
 
         curve1.distance(curve2) shouldBe (121.5429 plusOrMinus 0.001)
     }
 
     "doesn't overflow the node stack if the curves are very long" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(1.0, 0.0),
             Point(4.0, 4.0)
-        )).rebalance(1000)
-        val curve2 = Curve(listOf(
+        ).rebalance(1000)
+        val curve2 = Curve(
             Point(0.0, 0.0),
             Point(4.0, 4.0)
-        )).rebalance(1000)
+        ).rebalance(1000)
 
         curve1.distance(curve2) shouldBe 1
     }
 
     "gives correct results 0.05904781410962402" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(x = -1.3383296967610327, y = -0.3549407645542184),
             Point(x = -1.3162547250509251, y = -0.2828077308252626),
             Point(x = -1.294179753340817, y = -0.21067469709630685),
@@ -252,8 +252,8 @@ class CurveDistanceTests : StringSpec({
             Point(x = 1.5902044455323256, y = -0.31356968532865986),
             Point(x = 1.6633733806475222, y = -0.3319214118156393),
             Point(x = 1.7365423157627176, y = -0.35027313830261847)
-        ))
-        val curve2 = Curve(listOf(
+        )
+        val curve2 = Curve(
             Point(x = -1.325757081156583, y = -0.3993463225547311),
             Point(x = -1.3060983614008737, y = -0.32651766289034356),
             Point(x = -1.2864396416451642, y = -0.253689003225956),
@@ -304,7 +304,7 @@ class CurveDistanceTests : StringSpec({
             Point(x = 1.5997714677522294, y = -0.260398496757877),
             Point(x = 1.673511368162987, y = -0.2763015159163981),
             Point(x = 1.747251268573746, y = -0.29220453507491995)
-        ))
+        )
 
         curve1.distance(curve2) shouldBe (0.05904781410962402 plusOrMinus 0.001)
     }
@@ -312,10 +312,10 @@ class CurveDistanceTests : StringSpec({
 
 class CurveNormalizationTests : StringSpec({
     "normalizes the scale and translation of the curve" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(0.0, 0.0),
             Point(4.0, 4.0)
-        ))
+        )
 
         val normalizedCurve = curve1.normalize(rebalance = false)
 
@@ -327,10 +327,10 @@ class CurveNormalizationTests : StringSpec({
     }
 
     "can be configured to rebalance with a custom number of points" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(0.0, 0.0),
             Point(4.0, 4.0)
-        ))
+        )
 
         val normalizedCurve = curve1.normalize(estimationPoints = 3)
 
@@ -345,17 +345,17 @@ class CurveNormalizationTests : StringSpec({
     }
 
     "gives identical results for identical curves with different numbers of points after rebalancing" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(0.0, 0.0),
             Point(4.0, 4.0)
-        ))
+        )
         val normalizedCurve1 = curve1.normalize()
 
-        val curve2 = Curve(listOf(
+        val curve2 = Curve(
             Point(0.0, 0.0),
             Point(3.0, 3.0),
             Point(4.0, 4.0)
-        ))
+        )
         val normalizedCurve2 = curve2.normalize()
 
         normalizedCurve1.points.forEachIndexed { i, (p1x, p1y) ->
@@ -369,27 +369,27 @@ class CurveNormalizationTests : StringSpec({
 
 class CurveRotationAngleTests : StringSpec({
     "determines the optimal rotation angle to match 2 curves on top of each other" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(0.0, 0.0),
             Point(1.0, 0.0)
-        ))
-        val curve2 = Curve(listOf(
+        )
+        val curve2 = Curve(
             Point(0.0, 0.0),
             Point(0.0, 1.0)
-        ))
+        )
 
         curve1.rotationAngle(curve2) shouldBe ((-1 * Math.PI) / 2 plusOrMinus 0.001)
     }
 
     "return 0 if the curves have the same rotation" {
-        val curve1 = Curve(listOf(
+        val curve1 = Curve(
             Point(0.0, 0.0),
             Point(1.0, 1.0)
-        ))
-        val curve2 = Curve(listOf(
+        )
+        val curve2 = Curve(
             Point(0.0, 0.0),
             Point(1.5, 1.5)
-        ))
+        )
 
         curve1.rotationAngle(curve2) shouldBe 0.0
     }
@@ -410,11 +410,11 @@ private fun translateScaleAndRotate(curve: Curve, rotation: Double, translation:
 
 class CurveSimilarityTests : StringSpec({
     "returns 1 if curves are identical no matter the rotation, scale, and translation between the curves" {
-        val curve = Curve(listOf(
+        val curve = Curve(
             Point(0.0, 0.0),
             Point(2.0, 4.0),
             Point(18.0, -3.0)
-        ))
+        )
         rotations.forEach { theta ->
             translations.forEach { translation ->
                 scales.forEach { scale ->
@@ -427,11 +427,9 @@ class CurveSimilarityTests : StringSpec({
 
     "allows restricting the rotation angles that are checked" {
         val curve = Curve(
-            listOf(
-                Point(0.0, 0.0),
-                Point(2.0, 4.0),
-                Point(18.0, -3.0)
-            )
+            Point(0.0, 0.0),
+            Point(2.0, 4.0),
+            Point(18.0, -3.0)
         )
         val withinRangeRotations = listOf(0.0, -0.2, -0.3, 0.2, 0.3)
         val outOfRangeRotations = listOf(-0.5, 0.5, Math.PI)
