@@ -2,9 +2,7 @@ package app.farepay.curvematcher
 
 import app.farepay.curvematcher.Point.Companion.extendOnLine
 import java.util.*
-import kotlin.math.ceil
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 data class Curve(val points: List<Point>) {
 
@@ -78,4 +76,43 @@ data class Curve(val points: List<Point>) {
             )
         }
     )
+
+    fun distance(that: Curve): Double {
+        val thisLen = this.length()
+        val thatLen = that.length()
+
+        val longCurve = if (thisLen >= thatLen) { this } else { that }
+        val shortCurve = if (thisLen <= thatLen) { this } else { that }
+
+        fun calcVal(i: Int, j: Int, prevResultsCol: LinkedList<Double>, curResultsCol: LinkedList<Double>): Double {
+            if (i == 0 && j == 0) {
+                return longCurve.points[0].distance(shortCurve.points[0])
+            }
+
+            if (i > 0 && j == 0) {
+                return max(prevResultsCol[0], longCurve.points[i].distance(shortCurve.points[0]))
+            }
+
+            val lastResult = curResultsCol[curResultsCol.size - 1]
+            if (i == 0 && j > 0) {
+                return max(lastResult, longCurve.points[0].distance(shortCurve.points[j]))
+            }
+
+            return max(minOf(prevResultsCol[j], prevResultsCol[j - 1], lastResult),
+                longCurve.points[i].distance(shortCurve.points[j])
+            )
+        }
+
+        var prevResultsCol = LinkedList<Double>()
+        for (i in longCurve.points.indices) {
+            val curResultsCol = LinkedList<Double>()
+
+            for (j in shortCurve.points.indices) {
+                curResultsCol.addLast(calcVal(i, j, prevResultsCol, curResultsCol))
+            }
+            prevResultsCol = curResultsCol
+        }
+
+        return prevResultsCol[shortCurve.points.size - 1]
+    }
 }
