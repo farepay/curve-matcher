@@ -115,4 +115,24 @@ data class Curve(val points: List<Point>) {
 
         return prevResultsCol[shortCurve.points.size - 1]
     }
+
+    fun normalize(rebalance: Boolean = true, estimationPoints: Int = 50): Curve {
+        val curve = if (rebalance) { this.rebalance(estimationPoints) } else { this }
+        val meanX = curve.points.map { it.x }.average()
+        val meanY = curve.points.map { it.y }.average()
+        val mean = Point(x = meanX, y = meanY)
+        val translatedPoints = curve.points.map { it.subtract(mean) }
+        val scale = sqrt(translatedPoints.map { (x, y) -> x * x + y * y}.average())
+        return Curve(translatedPoints.map{ (x, y) -> Point(x = x / scale, y = y / scale) })
+    }
+
+    fun rotationAngle(relativeCurve: Curve): Double {
+        if (points.size != relativeCurve.points.size) {
+            throw IllegalArgumentException("curve and relativeCurve must have the same length")
+        }
+
+        val numerator = points.mapIndexed { i, (x, y) -> y * relativeCurve.points[i].x - x * relativeCurve.points[i].y}.sum()
+        val denominator = points.mapIndexed { i, (x, y) -> x * relativeCurve.points[i].x + y * relativeCurve.points[i].y}.sum()
+        return atan2(numerator, denominator)
+    }
 }

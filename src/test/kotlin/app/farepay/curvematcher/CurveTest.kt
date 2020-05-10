@@ -193,3 +193,88 @@ class CurveDistanceTests : StringSpec({
         curve1.distance(curve2) shouldBe 1
     }
 })
+
+class CurveNormalizationTests : StringSpec({
+    "normalizes the scale and translation of the curve" {
+        val curve1 = Curve(listOf(
+            Point(0.0, 0.0),
+            Point(4.0, 4.0)
+        ))
+
+        val normalizedCurve = curve1.normalize(rebalance = false)
+
+        normalizedCurve.points[0].x shouldBe ((-1 * sqrt(2.0)) / 2 plusOrMinus 0.001)
+        normalizedCurve.points[0].y shouldBe ((-1 * sqrt(2.0)) / 2 plusOrMinus 0.001)
+
+        normalizedCurve.points[1].x shouldBe (sqrt(2.0) / 2 plusOrMinus 0.001)
+        normalizedCurve.points[1].y shouldBe (sqrt(2.0) / 2 plusOrMinus 0.001)
+    }
+
+    "can be configured to rebalance with a custom number of points" {
+        val curve1 = Curve(listOf(
+            Point(0.0, 0.0),
+            Point(4.0, 4.0)
+        ))
+
+        val normalizedCurve = curve1.normalize(estimationPoints = 3)
+
+        normalizedCurve.points[0].x shouldBe ((-1 * sqrt(3.0)) / 2 plusOrMinus 0.001)
+        normalizedCurve.points[0].y shouldBe ((-1 * sqrt(3.0)) / 2 plusOrMinus 0.001)
+
+        normalizedCurve.points[1].x shouldBe 0.0
+        normalizedCurve.points[1].y shouldBe 0.0
+
+        normalizedCurve.points[2].x shouldBe (sqrt(3.0) / 2 plusOrMinus 0.001)
+        normalizedCurve.points[2].y shouldBe (sqrt(3.0) / 2 plusOrMinus 0.001)
+    }
+
+    "gives identical results for identical curves with different numbers of points after rebalancing" {
+        val curve1 = Curve(listOf(
+            Point(0.0, 0.0),
+            Point(4.0, 4.0)
+        ))
+        val normalizedCurve1 = curve1.normalize()
+
+        val curve2 = Curve(listOf(
+            Point(0.0, 0.0),
+            Point(3.0, 3.0),
+            Point(4.0, 4.0)
+        ))
+        val normalizedCurve2 = curve2.normalize()
+
+        normalizedCurve1.points.forEachIndexed { i, (p1x, p1y) ->
+            val (p2x, p2y) = normalizedCurve2.points[i]
+
+            p1x shouldBe (p2x plusOrMinus 0.001)
+            p1y shouldBe (p2y plusOrMinus 0.001)
+        }
+    }
+})
+
+class CurveRotationAngleTests : StringSpec({
+    "determines the optimal rotation angle to match 2 curves on top of each other" {
+        val curve1 = Curve(listOf(
+            Point(0.0, 0.0),
+            Point(1.0, 0.0)
+        ))
+        val curve2 = Curve(listOf(
+            Point(0.0, 0.0),
+            Point(0.0, 1.0)
+        ))
+
+        curve1.rotationAngle(curve2) shouldBe ((-1 * Math.PI) / 2 plusOrMinus 0.001)
+    }
+
+    "return 0 if the curves have the same rotation" {
+        val curve1 = Curve(listOf(
+            Point(0.0, 0.0),
+            Point(1.0, 1.0)
+        ))
+        val curve2 = Curve(listOf(
+            Point(0.0, 0.0),
+            Point(1.5, 1.5)
+        ))
+
+        curve1.rotationAngle(curve2) shouldBe 0.0
+    }
+})
